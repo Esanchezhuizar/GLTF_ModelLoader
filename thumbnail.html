@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<body>
+	
+	<div id="container"></div>
+	
+	<script type="module">
+		//https://threejs.org/docs/#manual/en/introduction/Loading-3D-models
+		import * as THREE from './three.js-master/build/three.module.js';
+        import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
+        import { OrbitControls } from './jsm/controls/OrbitControls.js';
+			
+        //create a scene, camera and renderer
+        let scene, camera, renderer, controls;
+        
+        function init() {
+
+            //Scenes allow you to set up what and where is to be rendered by three.js. 
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xdddddd);
+
+		    camera = new THREE.PerspectiveCamera(40,window.innerWidth/window.innerHeight,1,100);
+		    camera.position.set( 2, 0);
+
+            //The WebGL renderer displays scenes using WebGL.
+            renderer = new THREE.WebGLRenderer({antialias:true});
+            renderer.setSize(window.innerWidth,window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            //lighting
+            const directionalLight = new THREE.DirectionalLight(0xffffff,100);
+            directionalLight.position.set(0,1,0);
+            directionalLight.castShadow = true;
+            scene.add(directionalLight);
+        
+            //Use GLTFLoader class and use load method to load our model file.
+            let loader = new GLTFLoader();
+         
+            
+            loader.load('models/gltf/item/scene.gltf', function(gltf){
+                const itm = gltf.scene.children[0];
+                itm.scale.set(0.5,0.5,0.5);
+                let model = gltf.scene;
+                scene.add(model);
+                animate();
+            });
+
+            //Use three.js OrbitControl plugin to add a 360 degrees viewer that let the users rotate the camera. 
+            //We create the control object from our camera and addEventListener to track the mouse control.
+            const controls = new OrbitControls(camera,renderer.domElement);
+            controls.addEventListener('change', renderer);
+
+            controls.minPolarAngle = Math.PI / 2; // prevent top views
+	        controls.maxPolarAngle = Math.PI / 2; // prevent bottom view
+            controls.enableZoom = false; //disable dollying of the camera 
+           
+            //Find way to rotate without clicking, a need for fragmanted rotation
+            // controls.enableDamping = true; //adds weight to control rotation. Not as moo
+            // controls.dampinFactor = 10;
+
+        }
+
+        //Update the scene when users rotate the camera.    
+        function animate() {
+            renderer.render(scene,camera);
+            requestAnimationFrame(animate);
+        }
+    init();
+				
+	</script>
+
+</body>
+		
+</html> 

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>three.js webgl - animation - keyframes</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<link type="text/css" rel="stylesheet" href="main.css">
+	<style>
+		body {
+			background-color: #bfe3dd;
+			color: #000;
+		}
+		
+		a {
+			color: #2983ff;
+		}
+	</style>
+</head>
+
+<body>
+	
+	<div id="container"></div>
+	
+	<script type="module">
+		
+		import * as THREE from './three.js-master/build/three.module.js';
+        import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
+        import { OrbitControls } from './jsm/controls/OrbitControls.js';
+			
+		let scene, camera, renderer, controls;
+        let windowHalfX = window.innerWidth/2;
+        let windowHalfY = window.innerHeight/2;
+        var strDownloadMime = "image/octet-stream";
+        var counter = 12;
+        var x_pos = 5;
+        var rotation = 0;
+        
+
+    function init() {
+        var saveLink = document.createElement('div');
+        saveLink.style.position = 'absolute';
+        saveLink.style.top = '10px';
+        saveLink.style.width = '100%';
+        saveLink.style.color = 'white !important';
+        saveLink.style.textAlign = 'center';
+        saveLink.innerHTML =
+            '<a href="#" id="saveLink">Save Frame</a>';
+        document.body.appendChild(saveLink);
+        document.getElementById("saveLink").addEventListener('click', saveAsImage);
+        
+
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xdddddd);
+
+		camera = new THREE.PerspectiveCamera(10,window.innerWidth/window.innerHeight,1,100);
+		camera.position.set( 5, 2, 8 );
+
+        renderer = new THREE.WebGLRenderer({antialias:true,  preserveDrawingBuffer: true});
+        renderer.setSize(window.innerWidth,window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // const hlight = new THREE.AmbientLight (0x404040, 100);
+        // scene.add(hlight);
+        const directionalLight = new THREE.DirectionalLight(0xffffff,100);
+        directionalLight.position.set(10,10,10);
+        directionalLight.castShadow = true;
+        scene.add(directionalLight);
+
+        const controls = new OrbitControls(camera,renderer.domElement);
+        controls.addEventListener('change', renderer);
+
+        
+        // const light = new THREE.PointLight(0x404040,10,100);
+        // light.position.set(0,300,500);
+        // scene.add(light);
+        // const light2 = new THREE.PointLight(0x404040,10,100);
+        // light2.position.set(500,300,0);
+        // scene.add(light2);
+        // const light3 = new THREE.PointLight(0x404040,10,100);
+        // light3.position.set(0,300,-500);
+        // scene.add(light3);
+        // const light4 = new THREE.PointLight(0x404040,10,100);
+        // light4.position.set(-500,300,0);
+        // scene.add(light4);
+
+        let loader = new GLTFLoader();
+        loader.load('models/gltf/item/scene.gltf', function(gltf){
+            const itm = gltf.scene.children[0];
+            itm.scale.set(0.5,0.5,0.5);
+            scene.add(gltf.scene);
+            animate();        
+        
+        });
+
+    }
+
+    function animate() {
+        renderer.render(scene,camera);
+
+        //keeps track of images (12)
+        if (counter > 0) {
+            saveAsImage();
+            counter -= 1;
+        }
+        rotation += 0.03;
+        camera.position.x = Math.sin(rotation) * 5;
+        camera.position.y = 2;
+        camera.position.z = 8;
+        camera.lookAt( scene.position ); // the origin
+        console.log(counter)        
+        requestAnimationFrame(animate);
+    }
+
+    function saveAsImage() {
+        var imgData, imgNode;
+
+        try {
+            var strMime = "image/jpeg";
+            imgData = renderer.domElement.toDataURL(strMime);
+
+            saveFile(imgData.replace(strMime, strDownloadMime), "test.jpg");
+
+        } catch (e) {
+            console.log(e);
+            return;
+        }
+
+    }
+
+    var saveFile = function (strData, filename) {
+        var link = document.createElement('a');
+        if (typeof link.download === 'string') {
+            document.body.appendChild(link); //Firefox requires the link to be in the body
+            link.download = filename;
+            link.href = strData;
+            link.click();
+            document.body.removeChild(link); //remove the link when done
+        } else {
+            location.replace(uri);
+        }
+    }
+    
+    init();
+    
+    
+
+    
+    
+    
+				
+	</script>
+			
+			
+	</body>
+		
+</html> 
